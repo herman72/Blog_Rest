@@ -37,8 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'BlogApi.apps.BlogapiConfig'
 
 ]
+AUTH_USER_MODEL = 'BlogApi.UserBlog'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

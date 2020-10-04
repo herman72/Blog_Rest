@@ -5,7 +5,7 @@ from BlogApi.models import Post, Comment, UserBlog
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('title', 'text', 'published_date')
+        fields = ('title', 'text')
 
 
 class CommentSerializer(serializers.ModelSerializer):

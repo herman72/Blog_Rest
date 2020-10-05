@@ -11,13 +11,14 @@ class PostSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text',)
+        fields = ('text', 'post')
 
 
-class UserCreationSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+class UserCreationSerializer(serializers.ModelSerializer):
+    # email = serializers.EmailField(required=True)
+    password1 = serializers.CharField(required=True, max_length=255)
+    password2 = serializers.CharField(required=True, max_length=255)
 
     class Meta:
         Model = UserBlog
         fields = ("username", "email", "password1", "password2")
-

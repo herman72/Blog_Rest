@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'BlogApi.apps.BlogapiConfig'
+    'BlogApi.apps.BlogapiConfig',
+    'rest_framework',
 
 ]
 AUTH_USER_MODEL = 'BlogApi.UserBlog'

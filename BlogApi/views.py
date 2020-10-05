@@ -21,9 +21,6 @@ from django.views.decorators.csrf import csrf_exempt
 #         return self.create(request, *args, **kwargs)
 
 
-
-
-
 class PostList(generics.GenericAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()

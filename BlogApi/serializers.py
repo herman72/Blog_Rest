@@ -5,13 +5,13 @@ from BlogApi.models import Post, Comment, UserBlog
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('title', 'text')
+        fields = ['title', 'text']
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text', 'post')
+        fields = ['text', 'post']
 
 
 class UserCreationSerializer(serializers.ModelSerializer):
@@ -21,4 +21,4 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
     class Meta:
         Model = UserBlog
-        fields = ("username", "email", "password1", "password2")
+        fields = ["username", "email", "password1", "password2"]

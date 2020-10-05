@@ -1,8 +1,7 @@
-from rest_framework import status
+from rest_framework import status, mixins, generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from BlogApi.models import Post
 from django.shortcuts import render
 from rest_framework.parsers import JSONParser
@@ -11,7 +10,23 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
 
-class PostList(APIView):
+# class PostList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+#     queryset = Post.objects.all()
+#     serializer_class = PostSerializer
+#
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+#
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+
+
+
+
+
+class PostList(generics.GenericAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
     def get(self, request, format=None):
         posts = Post.objects.all()
@@ -25,7 +40,9 @@ class PostList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostDetail(APIView):
+class PostDetail(generics.GenericAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
     def get_object(self, pk):
         try:
@@ -51,7 +68,6 @@ class PostDetail(APIView):
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):
 #     if request.method == 'GET':
@@ -67,8 +83,8 @@ class PostDetail(APIView):
 #             serializer.save()
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+#
+#
 # @api_view(['GET', 'PUT', 'DELETE'])
 # def post_detail(request, pk, format=None):
 #     try:

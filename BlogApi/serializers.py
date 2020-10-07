@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from BlogApi.models import Post, Comment, UserBlog
 
 
@@ -20,5 +22,20 @@ class UserCreationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(required=True, max_length=255)
 
     class Meta:
-        Model = UserBlog
-        fields = ["username", "email", "password1", "password2"]
+        model = UserBlog
+        fields = ['username', 'email', 'password1', 'password2']
+
+    def validate(self, data):
+
+        if data['password1'] != data['password2']:
+            raise serializers.ValidationError("no same pass")
+        else:
+            return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    # posts = serializers.PrimaryKeyRelatedField(many=True, queryset=Post.objects.all())
+
+    class Meta:
+        model = UserBlog
+        fields = [ 'username']

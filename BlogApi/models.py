@@ -31,6 +31,7 @@ class Comment(models.Model):
 
 
 class UserBlog(AbstractUser):
+
     forget_password_code = models.CharField(max_length=32, null=True, blank=True)
     forget_password_code_expiration = models.DateTimeField(null=True, blank=True)
     following = models.ManyToManyField('UserBlog', related_name='followers')

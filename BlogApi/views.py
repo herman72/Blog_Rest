@@ -1,11 +1,13 @@
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from rest_framework import status, mixins, generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from BlogApi.models import Post
+from BlogApi.models import Post, UserBlog
 from django.shortcuts import render
 from rest_framework.parsers import JSONParser
-from BlogApi.serializers import PostSerializer
+from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
@@ -64,6 +66,39 @@ class PostDetail(generics.GenericAPIView):
         post = self.get_object(pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class Register(generics.GenericAPIView):
+    serializer_class = UserCreationSerializer
+    queryset = UserBlog.objects.all()
+
+    # def get(self, request, format=None):
+    #     serializer = UserCreationSerializer()
+    #
+    #     return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = UserCreationSerializer(data=request.data)
+
+        if serializer.is_valid():
+            print(serializer.validated_data['username'])
+            user = UserBlog.objects.create(username=serializer.validated_data['username'])
+            # user.username = serializer.validated_data['username']
+            user.email = serializer.validated_data['email']
+            user.password = make_password(serializer.validated_data['password1'])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserList(generics.ListAPIView):
+    queryset = UserBlog.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = UserBlog.objects.all()
+    serializer_class = UserSerializer
 
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):

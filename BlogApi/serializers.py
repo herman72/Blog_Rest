@@ -1,3 +1,5 @@
+from abc import ABC
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -38,4 +40,22 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserBlog
-        fields = [ 'username']
+        fields = ['username']
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True, max_length=255)
+    password = serializers.CharField(required=True, max_length=255)
+
+    def validate(self, data):
+
+        try:
+            user = UserBlog.objects.get(username=data['username'])
+            if user.password == data['password']:
+                return data
+            else:
+                raise serializers.ValidationError('Pass incorrect')
+
+        except:
+
+            raise serializers.ValidationError("no user")

@@ -1,3 +1,4 @@
+from django.contrib.auth import login
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import status, mixins, generics
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 from BlogApi.models import Post, UserBlog
 from django.shortcuts import render
 from rest_framework.parsers import JSONParser
-from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer
+from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer, LoginSerializer
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
@@ -99,6 +100,18 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = UserBlog.objects.all()
     serializer_class = UserSerializer
+
+
+class UserLogin(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    queryset = UserBlog.objects.all()
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            login(request, serializer.validated_data['username'])
+
 
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):

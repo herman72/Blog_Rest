@@ -50,12 +50,15 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
 
         try:
+            print(data['password'])
             user = UserBlog.objects.get(username=data['username'])
-            if user.password == data['password']:
+
+            if user.check_password(data['password']):
                 return data
             else:
+
                 raise serializers.ValidationError('Pass incorrect')
 
-        except:
+        except UserBlog.DoesNotExist:
 
             raise serializers.ValidationError("no user")

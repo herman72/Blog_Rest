@@ -7,9 +7,12 @@ from BlogApi.models import Post, Comment, UserBlog
 
 
 class PostSerializer(serializers.ModelSerializer):
+    # author = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Post
         fields = ['title', 'text']
+        read_only_fields = ['author']
 
 
 class CommentSerializer(serializers.ModelSerializer):

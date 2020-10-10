@@ -1,6 +1,9 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.utils.decorators import method_decorator
 from rest_framework import status, mixins, generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -23,20 +26,25 @@ from django.views.decorators.csrf import csrf_exempt
 #
 #     def post(self, request, *args, **kwargs):
 #         return self.create(request, *args, **kwargs)
-
-
 class PostList(generics.GenericAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
+    @method_decorator(login_required(login_url='', redirect_field_name=''))
     def get(self, request, format=None):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
+
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
+            post = Post.objects.create(author=request.user, title=serializer.validated_data['title'], text=serializer.validated_data['text'])
+
+            # serializer.author = request.data['author']
+            post.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,6 +127,12 @@ class UserLogin(generics.GenericAPIView):
             return Response(serializer.errors, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
 
 
+class Logout(generics.GenericAPIView):
+    # @method_decorator(login_required(login_url='/login/?next=/logout', redirect_field_name=''))
+    def get(self, request):
+        logout(request)
+
+        return Response(reverse('login'))
 
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):

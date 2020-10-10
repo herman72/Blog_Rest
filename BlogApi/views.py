@@ -37,10 +37,10 @@ class PostList(generics.GenericAPIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
-            post = Post.objects.create(author=request.user, title=serializer.validated_data['title'], text=serializer.validated_data['text'])
+            post = Post.objects.create(author=request.user, title=serializer.validated_data['title'],
+                                       text=serializer.validated_data['text'])
 
             # serializer.author = request.data['author']
             post.save()
@@ -118,7 +118,6 @@ class UserLogin(generics.GenericAPIView):
         serializer = LoginSerializer(data=request.data)
 
         if serializer.is_valid():
-            print(serializer.validated_data['username'])
             user = UserBlog.objects.get(username=serializer.validated_data['username'])
             login(request, user)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
@@ -132,7 +131,7 @@ class Logout(generics.GenericAPIView):
     def get(self, request):
         logout(request)
 
-        return Response(reverse('login'))
+        return Response(status=status.HTTP_202_ACCEPTED)
 
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):

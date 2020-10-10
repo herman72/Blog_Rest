@@ -53,7 +53,6 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
 
         try:
-            print(data['password'])
             user = UserBlog.objects.get(username=data['username'])
 
             if user.check_password(data['password']):

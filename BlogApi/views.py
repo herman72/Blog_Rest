@@ -42,7 +42,6 @@ class PostList(generics.GenericAPIView):
             post = Post.objects.create(author=request.user, title=serializer.validated_data['title'],
                                        text=serializer.validated_data['text'])
 
-            # serializer.author = request.data['author']
             post.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -4,31 +4,27 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from rest_framework import status, mixins, generics
+from rest_framework import status, mixins, generics, permissions
 from rest_framework.decorators import api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from BlogApi.models import Post, UserBlog
+from BlogApi.models import Post, UserBlog, Comment
 from django.shortcuts import render, redirect
 from rest_framework.parsers import JSONParser
-from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer, LoginSerializer
+
+from BlogApi.permissions import IsOwnerOrReadOnly
+from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer, LoginSerializer, \
+    CommentSerializer
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
 
-# class PostList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
-#
-#     def get(self, request, *args, **kwargs):
-#         return self.list(request, *args, **kwargs)
-#
-#     def post(self, request, *args, **kwargs):
-#         return self.create(request, *args, **kwargs)
 class PostList(generics.GenericAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get(self, request, format=None):
         posts = Post.objects.all()
@@ -50,6 +46,7 @@ class PostList(generics.GenericAPIView):
 class PostDetail(generics.GenericAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get_object(self, pk):
         try:
@@ -80,11 +77,6 @@ class Register(generics.GenericAPIView):
     serializer_class = UserCreationSerializer
     queryset = UserBlog.objects.all()
 
-    # def get(self, request, format=None):
-    #     serializer = UserCreationSerializer()
-    #
-    #     return Response(serializer.data)
-
     def post(self, request, format=None):
         serializer = UserCreationSerializer(data=request.data)
 
@@ -93,7 +85,7 @@ class Register(generics.GenericAPIView):
             user.email = serializer.validated_data['email']
             user.password = make_password(serializer.validated_data['password1'])
             user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -118,7 +110,7 @@ class UserLogin(generics.GenericAPIView):
         if serializer.is_valid():
             user = UserBlog.objects.get(username=serializer.validated_data['username'])
             login(request, user)
-            return Response( status=status.HTTP_202_ACCEPTED)
+            return Response(status=status.HTTP_202_ACCEPTED)
         else:
 
             return Response(serializer.errors, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
@@ -130,6 +122,34 @@ class Logout(generics.GenericAPIView):
         logout(request)
 
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class AddComment(generics.GenericAPIView):
+    serializer_class = CommentSerializer
+    queryset = Post.objects.all()
+
+    # def get(self, request, pk):
+    #     comments = Comment.objects.get(pk=pk)
+    #     serializer = CommentSerializer(comments, many=True)
+    #     return Response(serializer.data)
+    # def get_object(self, pk):
+    #     try:
+    #         return Post.objects.get(pk=pk)
+    #     except Post.DoesNotExist:
+    #         raise Http404
+
+    def post(self, request, pk):
+        serializer = CommentSerializer(data=request.data)
+        post = get_object_or_404(Post, pk=pk)
+        if serializer.is_valid():
+            comment = Comment.objects.create(author_comment=request.user, post=post)
+            comment.text = serializer.validated_data['text']
+
+            comment.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 # @api_view(['GET', 'POST'])
 # def post_list(request, format=None):

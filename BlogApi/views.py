@@ -30,7 +30,6 @@ class PostList(generics.GenericAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
-    @method_decorator(login_required(login_url='', redirect_field_name=''))
     def get(self, request, format=None):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
@@ -119,14 +118,14 @@ class UserLogin(generics.GenericAPIView):
         if serializer.is_valid():
             user = UserBlog.objects.get(username=serializer.validated_data['username'])
             login(request, user)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response( status=status.HTTP_202_ACCEPTED)
         else:
 
             return Response(serializer.errors, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
 
 
 class Logout(generics.GenericAPIView):
-    # @method_decorator(login_required(login_url='/login/?next=/logout', redirect_field_name=''))
+
     def get(self, request):
         logout(request)
 

@@ -8,11 +8,12 @@ from BlogApi.models import Post, Comment, UserBlog
 
 class PostSerializer(serializers.ModelSerializer):
     # author = serializers.ReadOnlyField(source='owner.username')
+    author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
         model = Post
-        fields = ['title', 'text']
-        read_only_fields = ['author']
+        fields = ['title', 'text','author']
+        # read_only_fields = ['author']
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -48,7 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True, max_length=255)
-    password = serializers.CharField(required=True, max_length=255)
+    password = serializers.CharField(required=True, max_length=255,  style={'input_type': 'password'})
 
     def validate(self, data):
 

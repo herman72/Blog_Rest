@@ -130,8 +130,8 @@ class AddComment(generics.GenericAPIView):
     queryset = Post.objects.all()
 
     def get(self, request, pk):
-        comments = get_object_or_404(Comment, pk=pk)
-        serializer = CommentSerializer(comments)
+        post = Post.objects.get(pk=pk)
+        serializer = CommentSerializer(post.comments, many=True)
         return Response(serializer.data)
 
     def post(self, request, pk):
@@ -151,8 +151,6 @@ class AddComment(generics.GenericAPIView):
 class FollowerList(generics.GenericAPIView):
     serializer_class = FollowSerializer
     queryset = UserBlog.objects.all()
-
-    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get(self, request, pk):
         user = get_object_or_404(UserBlog, pk=pk)

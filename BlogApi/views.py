@@ -16,7 +16,7 @@ from rest_framework.parsers import JSONParser
 
 from BlogApi.permissions import IsOwnerOrReadOnly
 from BlogApi.serializers import PostSerializer, UserCreationSerializer, UserSerializer, LoginSerializer, \
-    CommentSerializer
+    CommentSerializer, FollowSerializer
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 
@@ -134,12 +134,6 @@ class AddComment(generics.GenericAPIView):
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
-    # def get_object(self, pk):
-    #     try:
-    #         return Post.objects.get(pk=pk)
-    #     except Post.DoesNotExist:
-    #         raise Http404
-
     def post(self, request, pk):
         serializer = CommentSerializer(data=request.data)
         post = get_object_or_404(Post, pk=pk)
@@ -153,42 +147,42 @@ class AddComment(generics.GenericAPIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-# @api_view(['GET', 'POST'])
-# def post_list(request, format=None):
-#     if request.method == 'GET':
-#         posts = Post.objects.all()
-#         serializer = PostSerializer(posts, many=True)
-#         return Response(serializer.data)
-#
-#     elif request.method == 'POST':
-#
-#         serializer = PostSerializer(data=request.data)
-#
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# @api_view(['GET', 'PUT', 'DELETE'])
-# def post_detail(request, pk, format=None):
-#     try:
-#         post = Post.objects.get(pk=pk)
-#     except Post.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
-#
-#     if request.method == 'GET':
-#         serializer = PostSerializer(post)
-#         return Response(serializer.data)
-#
-#     elif request.method == 'PUT':
-#         serializer = PostSerializer(post, data=request.data)
-#
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     elif request.method == 'DELETE':
-#         post.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class FollowerList(generics.GenericAPIView):
+    serializer_class = FollowSerializer
+    queryset = UserBlog.objects.all()
+
+    # permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get(self, request, pk):
+        user = get_object_or_404(UserBlog, pk=pk)
+        serializer = FollowSerializer(user)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        user = get_object_or_404(UserBlog, pk=pk)
+
+        serializer = FollowSerializer(data=request.data)
+        if request.user == user:
+            if serializer.is_valid():
+                user.following.add(serializer.validated_data['following'][0])
+                user.save()
+            else:
+                Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+
+        user = get_object_or_404(UserBlog, pk=pk)
+        serializer = FollowSerializer(data=request.data)
+        if request.user == user:
+            if serializer.is_valid():
+                user.following.remove(serializer.validated_data['following'][0])
+                user.save()
+            else:
+                Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

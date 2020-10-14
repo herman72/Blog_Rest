@@ -42,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserBlog
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'following']
 
 
 class LoginSerializer(serializers.Serializer):
@@ -63,3 +63,20 @@ class LoginSerializer(serializers.Serializer):
         except UserBlog.DoesNotExist:
 
             raise serializers.ValidationError("no user")
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    # owner = serializers.ReadOnlyField(source='author_comment.username')
+
+    class Meta:
+        model = UserBlog
+        fields = ['following']
+
+    def validate(self, data):
+
+        try:
+            user = UserBlog.objects.get(username=data['following'][0])
+            return data
+
+        except UserBlog.DoesNotExist:
+            raise serializers.ValidationError(" No User")

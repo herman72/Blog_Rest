@@ -9,11 +9,6 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField()
     created_time = models.DateTimeField(default=timezone.now)
-    # published_date = models.DateTimeField(blank=True, null=True)
-
-    # def publish(self):
-    #     self.published_date = timezone.now()
-    #     self.save()
 
     def __str__(self):
         return self.title
@@ -23,7 +18,6 @@ class Comment(models.Model):
     author_comment = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     text = models.TextField()
     created_time = models.DateTimeField(default=timezone.now)
-
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
 
     def __str__(self):
@@ -31,9 +25,6 @@ class Comment(models.Model):
 
 
 class UserBlog(AbstractUser):
-
     forget_password_code = models.CharField(max_length=32, null=True, blank=True)
     forget_password_code_expiration = models.DateTimeField(null=True, blank=True)
     following = models.ManyToManyField('UserBlog', related_name='followers')
-
-

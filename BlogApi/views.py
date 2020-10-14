@@ -126,12 +126,14 @@ class Logout(generics.GenericAPIView):
 
 class AddComment(generics.GenericAPIView):
     serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Post.objects.all()
 
-    # def get(self, request, pk):
-    #     comments = Comment.objects.get(pk=pk)
-    #     serializer = CommentSerializer(comments, many=True)
-    #     return Response(serializer.data)
+    def get(self, request, pk):
+        comments = get_object_or_404(Comment, pk=pk)
+        serializer = CommentSerializer(comments)
+        return Response(serializer.data)
+
     # def get_object(self, pk):
     #     try:
     #         return Post.objects.get(pk=pk)
